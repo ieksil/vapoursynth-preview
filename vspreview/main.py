@@ -400,8 +400,6 @@ class MainWindow(AbstractMainWindow):
     ]
 
     def __init__(self) -> None:
-        from qdarkstyle import load_stylesheet_pyqt5
-
         super().__init__()
 
         # logging
@@ -414,8 +412,13 @@ class MainWindow(AbstractMainWindow):
 
         self.app = Qt.QApplication.instance()
         if self.DARK_THEME:
-            self.app.setStyleSheet(self.patch_dark_stylesheet(load_stylesheet_pyqt5()))
-            self.ensurePolished()
+            try:
+                from qdarkstyle import load_stylesheet_pyqt5
+            except ImportError:
+                self.DARK_THEME = False
+            else:
+                self.app.setStyleSheet(self.patch_dark_stylesheet(load_stylesheet_pyqt5()))
+                self.ensurePolished()
 
         self.display_scale = self.app.primaryScreen().logicalDotsPerInch() / self.BASE_PPI
         self.setWindowTitle('VSPreview')
